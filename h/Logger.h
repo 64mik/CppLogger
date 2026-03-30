@@ -4,10 +4,13 @@
 #include <fstream>
 #include <filesystem>
 #include <time.h>
-#define LOG Logger::getInstance(Logger::LogLevel::INFO)
-#define LOG_INFO Logger::getInstance(Logger::LogLevel::INFO)
-#define LOG_WARNING Logger::getInstance(Logger::LogLevel::WARNING)
-#define LOG_ERROR Logger::getInstance(Logger::LogLevel::ERROR)
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#define LOG Logger::Wrapper(Logger::LogLevel::INFO)
+#define LOG_INFO Logger::Wrapper(Logger::LogLevel::INFO)
+#define LOG_WARNING Logger::Wrapper(Logger::LogLevel::WARNING)
+#define LOG_ERROR Logger::Wrapper(Logger::LogLevel::ERROR)
 class Logger {
 public:
     enum class LogLevel {
@@ -15,8 +18,39 @@ public:
         WARNING,
         ERROR
     };
-    static Logger& getInstance(const LogLevel logLevel=LogLevel::INFO);
-    Logger& operator<<(const std::string& message);
+    static Logger& getInstance();
+    void write(const std::string& str);
+    class Wrapper{
+        public:
+            Wrapper(Logger::LogLevel logLevel){
+                switch (logLevel)
+                {
+                case Logger::LogLevel::INFO:
+                    logBuffer << "[INFO] ";
+                    break;
+                case Logger::LogLevel::WARNING:
+                    logBuffer << "[WARNING] ";
+                    break;
+                case Logger::LogLevel::ERROR:
+                    logBuffer << "[ERROR] ";
+                    break;
+                default:
+                    break;
+                }
+            }
+            ~Wrapper(){
+                Logger::getInstance().write(logBuffer.str());
+            }
+            Wrapper(const Wrapper&) = delete;
+            Wrapper& operator=(const Wrapper&) = delete;
+            template<typename T>
+            Wrapper& operator<<(const T& value){
+                logBuffer << value << ' ';
+                return *this;
+            }
+        private:
+            std::ostringstream logBuffer;
+    };
 private:
     enum LogTimeIndex {
         YEAR,
@@ -31,15 +65,9 @@ private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
     void updateLogTime();
-    std::string getLogPrefix();
-    std::string padding(const int num, int value, std::string delimiter = "0");
-
     int logTime_[6] = {};
-    std::string logFileName_ = "";
     std::filesystem::path logDir_ = "logs";
     std::ofstream file_;
-    
-    LogLevel currentLogLevel_ = LogLevel::INFO;
-    
+    std::string currentFileName ="";
 };
 # endif // LOGGER_H

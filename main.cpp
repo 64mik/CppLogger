@@ -1,13 +1,17 @@
 #include <iostream>
 #include "h/Logger.h"
+void test(int count){
+    auto start = std::chrono::high_resolution_clock::now();
+    for(int i = 0; i < count; ++i) {
+        LOG << i << "This is a test log message to measure performance differences.";
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> diff = end - start;
+    std::cout << count << "회 실행 시간: " << diff.count() << " ms";
+}
 int main() {
-    
-    LOG << "hello" << 10;
-    LOG_INFO << "This is a log message. hello world!";
-    LOG_INFO << "This is another log message.";
-    LOG_ERROR << "This is an error message test.";
-    LOG_WARNING << "This is a warning message test.";
+    test(10000);
+    //10000회 실행 시간: 191.366 ms -> 10000회 실행 시간: 28.7653 ms
     return 0;
 }
-
-//콘솔, 파일, 네트워크 등 다양한 출력 방식 지원하도록 인터페이스 추상화도 필요할듯
+//getInstance() 내부의 std::filesystem::create_directories(logDir_); 성능병목 주 원인이였음.

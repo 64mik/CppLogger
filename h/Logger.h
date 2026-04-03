@@ -3,10 +3,15 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
-#include <time.h>
+#include <chrono>
 #include <sstream>
-#include <iostream>
 #include <iomanip>
+#include <queue>
+#include <condition_variable>
+#include <thread>
+#include <mutex>
+#include <atomic>
+
 #define LOG Logger::Wrapper(Logger::LogLevel::INFO)
 #define LOG_INFO Logger::Wrapper(Logger::LogLevel::INFO)
 #define LOG_WARNING Logger::Wrapper(Logger::LogLevel::WARNING)
@@ -19,7 +24,6 @@ public:
         ERROR
     };
     static Logger& getInstance();
-    void write(const std::string& str);
     class Wrapper{
         public:
             Wrapper(Logger::LogLevel logLevel){
@@ -39,35 +43,34 @@ public:
                 }
             }
             ~Wrapper(){
-                Logger::getInstance().write(logBuffer.str());
+                getInstance().enQueue(logBuffer.str());
             }
             Wrapper(const Wrapper&) = delete;
             Wrapper& operator=(const Wrapper&) = delete;
             template<typename T>
             Wrapper& operator<<(const T& value){
-                logBuffer << value << ' ';
+                logBuffer << value;
                 return *this;
             }
         private:
             std::ostringstream logBuffer;
     };
 private:
-    enum LogTimeIndex {
-        YEAR,
-        MONTH,
-        DAY,
-        HOUR,
-        MIN,
-        SEC
-    };
-    Logger() = default;
+    Logger();
     ~Logger();
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
-    void updateLogTime();
-    int logTime_[6] = {};
+    void enQueue(const std::string& str);
+    void deQueue();
+    void write(const std::string& data);
+
     std::filesystem::path logDir_ = "logs";
     std::ofstream file_;
-    std::string currentFileName ="";
+    std::string currentFileName_;
+    std::condition_variable cv_;
+    std::mutex mtx_;
+    std::queue<std::string> q_;
+    std::thread writer_;
+    std::atomic<bool> running_{true};
 };
 # endif // LOGGER_H

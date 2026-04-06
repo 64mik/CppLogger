@@ -72,5 +72,8 @@ private:
     std::queue<std::string> q_;
     std::thread writer_;
     std::atomic<bool> running_{true};
+    std::time_t last_t_ = 0;
+    char timeBuf_[25]; 
+    std::string lastDate_;
 };
 # endif // LOGGER_H

@@ -37,25 +37,22 @@ void Logger::deQueue() {
 void Logger::write(const std::string& data) {
     auto now = std::chrono::system_clock::now();
     auto in_time_t = std::chrono::system_clock::to_time_t(now);
-    static std::time_t last_t = 0;
-    static char timeBuf[25]; 
-    static std::string lastDate;
-    if (in_time_t != last_t) {
+    if (in_time_t != last_t_) {
         std::tm t;
         localtime_s(&t, &in_time_t);
         char dateBuf[11];
         strftime(dateBuf, sizeof(dateBuf), "%Y-%m-%d", &t);
         std::string newDate(dateBuf);
 
-        if (newDate != lastDate) {
+        if (newDate != lastDate_) {
             if (file_.is_open()) file_.close();
-            lastDate = newDate;
-            currentFileName_ = lastDate + ".log";
+            lastDate_ = newDate;
+            currentFileName_ = lastDate_ + ".log";
             file_.open(logDir_ / currentFileName_, std::ios::app);
         }
-        strftime(timeBuf, sizeof(timeBuf), "[%Y-%m-%d %H:%M:%S] ", &t);
-        last_t = in_time_t;
+        strftime(timeBuf_, sizeof(timeBuf_), "[%Y-%m-%d %H:%M:%S] ", &t);
+        last_t_ = in_time_t;
     }
-    file_ << timeBuf << data << '\n';
+    file_ << timeBuf_ << data << '\n';
 }
 

@@ -12,16 +12,16 @@
 #include <mutex>
 #include <atomic>
 
-#define LOG Logger::Wrapper(Logger::LogLevel::INFO)
-#define LOG_INFO Logger::Wrapper(Logger::LogLevel::INFO)
-#define LOG_WARNING Logger::Wrapper(Logger::LogLevel::WARNING)
-#define LOG_ERROR Logger::Wrapper(Logger::LogLevel::ERROR)
+#define LOG Logger::Wrapper(Logger::LogLevel::L_INFO)
+#define LOG_INFO Logger::Wrapper(Logger::LogLevel::L_INFO)
+#define LOG_WARNING Logger::Wrapper(Logger::LogLevel::L_WARNING)
+#define LOG_ERROR Logger::Wrapper(Logger::LogLevel::L_ERROR)
 class Logger {
 public:
     enum class LogLevel {
-        INFO,
-        WARNING,
-        ERROR
+        L_INFO,
+        L_WARNING,
+        L_ERROR
     };
     static Logger& getInstance();
     class Wrapper{
@@ -29,13 +29,13 @@ public:
             Wrapper(Logger::LogLevel logLevel){
                 switch (logLevel)
                 {
-                case Logger::LogLevel::INFO:
+                case Logger::LogLevel::L_INFO:
                     logBuffer << "[INFO] ";
                     break;
-                case Logger::LogLevel::WARNING:
+                case Logger::LogLevel::L_WARNING:
                     logBuffer << "[WARNING] ";
                     break;
-                case Logger::LogLevel::ERROR:
+                case Logger::LogLevel::L_ERROR:
                     logBuffer << "[ERROR] ";
                     break;
                 default:

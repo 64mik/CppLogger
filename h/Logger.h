@@ -12,10 +12,10 @@
 #include <mutex>
 #include <atomic>
 
-#define LOG Logger::Wrapper(Logger::LogLevel::L_INFO)
-#define LOG_INFO Logger::Wrapper(Logger::LogLevel::L_INFO)
-#define LOG_WARNING Logger::Wrapper(Logger::LogLevel::L_WARNING)
-#define LOG_ERROR Logger::Wrapper(Logger::LogLevel::L_ERROR)
+#define LOG Logger::Wrapper(Logger::LogLevel::L_INFO, __FUNCTION__, __LINE__)
+#define LOG_INFO Logger::Wrapper(Logger::LogLevel::L_INFO, __FUNCTION__, __LINE__)
+#define LOG_WARNING Logger::Wrapper(Logger::LogLevel::L_WARNING, __FUNCTION__, __LINE__)
+#define LOG_ERROR Logger::Wrapper(Logger::LogLevel::L_ERROR, __FUNCTION__, __LINE__)
 class Logger {
 public:
     enum class LogLevel {
@@ -26,21 +26,25 @@ public:
     static Logger& getInstance();
     class Wrapper{
         public:
-            Wrapper(Logger::LogLevel logLevel){
+            Wrapper(Logger::LogLevel logLevel, const char* func_name, int line = 0){
                 switch (logLevel)
                 {
                 case Logger::LogLevel::L_INFO:
                     logBuffer << "[INFO] ";
                     break;
                 case Logger::LogLevel::L_WARNING:
-                    logBuffer << "[WARNING] ";
+                    logBuffer << "[WARN] ";
                     break;
                 case Logger::LogLevel::L_ERROR:
-                    logBuffer << "[ERROR] ";
+                    logBuffer << "[ERR_] ";
                     break;
                 default:
                     break;
                 }
+                if (line > 0) {
+                    logBuffer << line << "| ";
+                }
+                logBuffer << func_name << "(): ";
             }
             ~Wrapper(){
                 getInstance().enQueue(logBuffer.str());

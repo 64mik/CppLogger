@@ -1,9 +1,17 @@
 #include <iostream>
 #include "h/Logger.h"
+
+void hello(){
+    LOG << "Hello, Logger";
+}
 void test(int count){
     auto start = std::chrono::high_resolution_clock::now();
     for(int i = 0; i < count; ++i) {
-        LOG << i << "This is a test log message to measure performance differences.";
+        if(i % 2 == 0) {
+            LOG_WARNING << i << "This is a warning log message.";
+        } else {
+            hello();
+        }
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> diff = end - start;

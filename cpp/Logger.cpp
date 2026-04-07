@@ -50,7 +50,7 @@ void Logger::write(const std::string& data) {
             currentFileName_ = lastDate_ + ".log";
             file_.open(logDir_ / currentFileName_, std::ios::app);
         }
-        strftime(timeBuf_, sizeof(timeBuf_), "[%Y-%m-%d %H:%M:%S] ", &t);
+        strftime(timeBuf_, sizeof(timeBuf_), "[%H:%M:%S] ", &t);
         last_t_ = in_time_t;
     }
     file_ << timeBuf_ << data << '\n';

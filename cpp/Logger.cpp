@@ -1,19 +1,18 @@
-#include "../h/Logger.h"
-
+#include "../h/logger.h"
+#include <iostream>
+void Logger::setWriters(std::vector<std::unique_ptr<IWriter>> writerptr){
+    this->writerptrs_ = std::move(writerptr);
+}
 Logger::Logger(){
-    std::filesystem::create_directories(logDir_);
     writer_ = std::thread(&Logger::deQueue, this);
 }
 Logger::~Logger() {
     running_ = false;
     cv_.notify_all();
     if (writer_.joinable()) writer_.join();
-    if (file_.is_open()) {
-        file_.close();
-    }
 }
 Logger& Logger::getInstance() {
-    static Logger instance;
+    static Logger instance; //왜 오류가 나지 ->
     return instance;
 }
 void Logger::enQueue(const std::string& data){
@@ -31,28 +30,9 @@ void Logger::deQueue() {
             data = std::move(q_.front());
             q_.pop();
         }
-        write(data);
-    }
-}
-void Logger::write(const std::string& data) {
-    auto now = std::chrono::system_clock::now();
-    auto in_time_t = std::chrono::system_clock::to_time_t(now);
-    if (in_time_t != last_t_) {
-        std::tm t;
-        localtime_s(&t, &in_time_t);
-        char dateBuf[11];
-        strftime(dateBuf, sizeof(dateBuf), "%Y-%m-%d", &t);
-        std::string newDate(dateBuf);
-
-        if (newDate != lastDate_) {
-            if (file_.is_open()) file_.close();
-            lastDate_ = newDate;
-            currentFileName_ = lastDate_ + ".log";
-            file_.open(logDir_ / currentFileName_, std::ios::app);
+        for(const auto& writer : writerptrs_){
+            if(writer)
+                writer->write(data);
         }
-        strftime(timeBuf_, sizeof(timeBuf_), "[%H:%M:%S] ", &t);
-        last_t_ = in_time_t;
     }
-    file_ << timeBuf_ << data << '\n';
 }
-

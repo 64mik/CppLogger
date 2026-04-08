@@ -1,6 +1,8 @@
 #include <iostream>
-#include "h/Logger.h"
-
+#include "h/logger.h"
+#include "h/loggerFactory.h"
+#include <chrono>
+#include <memory>
 void hello(){
     LOG << "Hello, Logger";
 }
@@ -18,7 +20,10 @@ void test(int count){
     std::cout << count << "회 실행 시간: " << diff.count() << " ms";
 }
 int main() {
+    auto writerptrs_ = LoggerFactory::getWriters({"file"});//, "console"});     둘다 정상 작동.
+    Logger::getInstance().setWriters(std::move(writerptrs_));
     test(10000);
+    //포인터가 해제된 메모리를 찾는 문제 수정
     //10000회 실행 시간: 191.366 ms -> 10000회 실행 시간: 28.7653 ms
     return 0;
 }

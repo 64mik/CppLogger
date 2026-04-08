@@ -1,17 +1,15 @@
 # ifndef LOGGER_H
 # define LOGGER_H
+#include "IWriter.h"
 #include <string>
-#include <fstream>
-#include <filesystem>
-#include <chrono>
 #include <sstream>
-#include <iomanip>
 #include <queue>
 #include <condition_variable>
 #include <thread>
 #include <mutex>
 #include <atomic>
-
+#include <vector>
+#include <memory>
 #define LOG Logger::Wrapper(Logger::LogLevel::L_INFO, __FUNCTION__, __LINE__)
 #define LOG_INFO Logger::Wrapper(Logger::LogLevel::L_INFO, __FUNCTION__, __LINE__)
 #define LOG_WARNING Logger::Wrapper(Logger::LogLevel::L_WARNING, __FUNCTION__, __LINE__)
@@ -24,6 +22,7 @@ public:
         L_ERROR
     };
     static Logger& getInstance();
+    void setWriters(std::vector<std::unique_ptr<IWriter>> writerptr);
     class Wrapper{
         public:
             Wrapper(Logger::LogLevel logLevel, const char* func_name, int line = 0){
@@ -59,25 +58,21 @@ public:
         private:
             std::ostringstream logBuffer;
     };
-private:
+protected:
     Logger();
     ~Logger();
+private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
     void enQueue(const std::string& str);
     void deQueue();
-    void write(const std::string& data);
 
-    std::filesystem::path logDir_ = "logs";
-    std::ofstream file_;
-    std::string currentFileName_;
+    std::thread writer_;
     std::condition_variable cv_;
     std::mutex mtx_;
     std::queue<std::string> q_;
-    std::thread writer_;
     std::atomic<bool> running_{true};
-    std::time_t last_t_ = 0;
-    char timeBuf_[25]; 
-    std::string lastDate_;
+
+    std::vector<std::unique_ptr<IWriter>> writerptrs_;
 };
 # endif // LOGGER_H

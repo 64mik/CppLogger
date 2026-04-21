@@ -23,6 +23,7 @@ public:
     };
     static Logger& getInstance();
     void setWriters(std::vector<std::unique_ptr<IWriter>> writerptr);
+    void flush();
     class Wrapper{
         public:
             Wrapper(Logger::LogLevel logLevel, const char* func_name, int line = 0){
@@ -72,6 +73,8 @@ private:
     std::mutex mtx_;
     std::queue<std::string> q_;
     std::atomic<bool> running_{true};
+    std::atomic<bool> is_ptr_changed_{false};
+    std::atomic<int> processing_count_{0};
 
     std::vector<std::unique_ptr<IWriter>> writerptrs_;
 };

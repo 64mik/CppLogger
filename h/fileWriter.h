@@ -3,6 +3,7 @@
 #include "IWriter.h"
 #include <fstream>
 #include <filesystem>
+#include <mutex>
 class FileWriter : public IWriter {
 public:
     FileWriter(const std::string& logDirectory = "logs");
@@ -14,8 +15,10 @@ private:
     std::ofstream file_;
     std::string currentFileName_;
     std::time_t last_t_ = 0;
-    char timeBuf_[25]; 
+    char timeBuf_[25] = {};  // 초기화 추가
     std::string lastDate_;
+    std::mutex file_mutex_;
+    bool isFileOpen_ = false;
 
 };
 #endif // FILEWRITER_H

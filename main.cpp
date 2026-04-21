@@ -17,13 +17,17 @@ void test(int count){
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> diff = end - start;
-    std::cout << count << "회 실행 시간: " << diff.count() << " ms";
+    std::cout << count << "회 실행 시간: " << diff.count() << " ms" << std::endl;
+    Logger::getInstance().flush();
+    auto file_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> file_diff = file_end - start;
+    std::cout << count << "회 파일 작성 시간: " << file_diff.count() << " ms" << std::endl;
 }
 int main() {
     Logger::getInstance().setWriters(LoggerFactory::getWriters({"file"}));
     LOG_INFO << "This is an info message " << 1;
     LOG_WARNING << "This is a" << " warning message";
     LOG_ERROR << 0.1 << "This is an error message";
-    //test(10000);
+    test(100000);    //10000회 실행 시간: 31.2833 ms 10000회 파일 작성 시간: 123.431 ms | 100000회 실행 시간: 327.319 ms 100000회 파일 작성 시간: 1882.02 ms
     return 0;
 }

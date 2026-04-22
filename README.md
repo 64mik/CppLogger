@@ -15,13 +15,13 @@ C++ logging library using the Singleton pattern. Supports multiple output destin
 ## How to use
 
 ### Basic Setup
-```main.cpp
+```cpp
+//main.cpp
 #include "h/logger.h"
 #include "h/loggerFactory.h"
 
-// Create writers console (and/or) file
-
 int main(){
+// Create writers console (and/or) file
 Logger::getInstance().setWriters(LoggerFactory::getWriters({"file","console"}));
 }
 ```
@@ -81,7 +81,7 @@ This project uses C++17 and requires a C++ compiler
 
 ## Performance
 
-- Tested with 10,000 logs in ~29ms on typical hardware
+- Tested with 100,000 logs in ~425ms (enqueue/dequeue) on Windows 11, Intel i5-10210U
 
 ## License
 

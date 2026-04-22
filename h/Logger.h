@@ -1,5 +1,5 @@
-# ifndef LOGGER_H
-# define LOGGER_H
+#ifndef LOGGER_H
+#define LOGGER_H
 #include "IWriter.h"
 #include <string>
 #include <sstream>
@@ -22,7 +22,7 @@ public:
         L_ERROR
     };
     static Logger& getInstance();
-    void setWriters(std::vector<std::unique_ptr<IWriter>> writerptr);
+    void setWriters(std::vector<std::shared_ptr<IWriter>> writerptr);
     void flush();
     class Wrapper{
         public:
@@ -76,6 +76,6 @@ private:
     std::atomic<bool> is_ptr_changed_{false};
     std::atomic<int> processing_count_{0};
 
-    std::vector<std::unique_ptr<IWriter>> writerptrs_;
+    std::vector<std::shared_ptr<IWriter>> writerptrs_;
 };
 # endif // LOGGER_H

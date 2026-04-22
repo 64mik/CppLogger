@@ -1,6 +1,6 @@
 #include "../h/logger.h"
 #include <iostream>
-void Logger::setWriters(std::vector<std::unique_ptr<IWriter>> writerptr){
+void Logger::setWriters(std::vector<std::shared_ptr<IWriter>> writerptr){
     std::lock_guard<std::mutex> lock(mtx_);
     this->writerptrs_ = std::move(writerptr);
     is_ptr_changed_ = true;
@@ -8,9 +8,12 @@ void Logger::setWriters(std::vector<std::unique_ptr<IWriter>> writerptr){
 Logger::Logger(){
     writer_ = std::thread(&Logger::deQueue, this);
 }
-Logger::~Logger() {
-    running_ = false;
-    cv_.notify_one();
+Logger::~Logger() {    
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        running_ = false;
+    }
+    cv_.notify_all();
     if (writer_.joinable()) writer_.join();
 }
 Logger& Logger::getInstance() {
@@ -28,7 +31,7 @@ void Logger::enQueue(const std::string& data){
 }
 void Logger::deQueue() {
     std::string data;
-    std::vector<IWriter*> writers;
+    std::vector<std::shared_ptr<IWriter>> writers;
     while (true) {
         {
             std::unique_lock<std::mutex> lock(mtx_);
@@ -39,12 +42,12 @@ void Logger::deQueue() {
             if(is_ptr_changed_) {
                 writers.clear();
                 for(const auto& writer : writerptrs_){
-                    writers.push_back(writer.get());
+                    writers.push_back(writer);
                 }
                 is_ptr_changed_ = false;
             }
+            processing_count_++;
         }
-        processing_count_++;    //atomic이므로 lock 불필요
         for(const auto& writer : writers){  //미설정시 애초에 for문 진입 안함
             if(writer)
                 writer->write(data);

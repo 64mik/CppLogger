@@ -4,9 +4,7 @@
 #include "consoleWriter.h"
 #include <vector>
 #include <memory>
-class LoggerFactory {
-public:
-    static std::vector<std::unique_ptr<IWriter>> getWriters(std::initializer_list<std::string> writerTypes);
-private:
-};
+namespace LoggerFactory {
+    std::vector<std::shared_ptr<IWriter>> getWriters(std::initializer_list<std::string> writerTypes);
+}
 #endif // LOGGERFACTORY_H

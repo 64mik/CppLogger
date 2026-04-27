@@ -1,10 +1,10 @@
-#ifndef LOGGERFACTORY_H
-#define LOGGERFACTORY_H
+#ifndef LOGGER_FACTORY_H
+#define LOGGER_FACTORY_H
 #include "fileWriter.h"
 #include "consoleWriter.h"
 #include <vector>
 #include <memory>
-namespace LoggerFactory {
+namespace mik64::LoggerFactory {
     std::vector<std::shared_ptr<IWriter>> getWriters(std::initializer_list<std::string> writerTypes);
 }
-#endif // LOGGERFACTORY_H
+#endif // LOGGER_FACTORY_H

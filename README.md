@@ -17,32 +17,33 @@ C++ logging library using the Singleton pattern. Supports multiple output destin
 ### Basic Setup
 ```cpp
 //main.cpp
-#include "h/logger.h"
-#include "h/loggerFactory.h"
+#include "mlog.h"
+#include "loggerFactory.h"
 
 int main(){
-// Create writers console (and/or) file
-Logger::getInstance().setWriters(LoggerFactory::getWriters({"file","console"}));
+	// Create writers console (and/or) file
+	mik64::Logger::getInstance().setWriters(mik64::LoggerFactory::getWriters({"file","console"}));
+	MLOG_INFO << "This is an info message " << 1;
 }
 ```
 
 ```cpp
-#include "h/logger.h"
+#include "mlog.h"
 
 void example(){
 	// Log messages
-	LOG_INFO << "This is an info message " << 1;
-	LOG_WARNING << "This is a" << " warning message";
-	LOG_ERROR << 0.1 << " This is an error message";
+	MLOG_INFO << "This is an info message " << 1;
+	MLOG_WARNING << "This is a" << " warning message";
+	MLOG_ERROR << 0.1 << " This is an error message";
 }
 ```
 
 ### Macros
 
-- `LOG_INFO`: Logs at INFO level
-- `LOG_WARNING`: Logs at WARNING level
-- `LOG_ERROR`: Logs at ERROR level
-- `LOG`: It's Alias for LOG_INFO, It will be None LogLevel later
+- `MLOG_INFO`: Logs at INFO level
+- `MLOG_WARNING`: Logs at WARNING level
+- `MLOG_ERROR`: Logs at ERROR level
+- `MLOG`: It's Alias for LOG_INFO, It will be None LogLevel later
 
 ### Log Output Format
 

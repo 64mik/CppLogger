@@ -8,3 +8,5 @@ add_library(cpp-logger STATIC ${LOGGER_SOURCES})
 target_include_directories(cpp-logger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/h)
 
 target_compile_features(cpp-logger PUBLIC cxx_std_17)
+add_executable(cpp-logger-test main.cpp)
+target_link_libraries(cpp-logger-test PRIVATE cpp-logger)

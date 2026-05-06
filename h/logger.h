@@ -19,29 +19,13 @@ namespace mik64{
             L_ERROR
         };
         static Logger& getInstance();
+        void log(LogLevel logLevel, const std::string& func_name, int line, const std::string& message);
         void setWriters(std::vector<std::shared_ptr<IWriter>> writerptr);
         void flush();
         class Wrapper{
             public:
                 Wrapper(Logger::LogLevel logLevel, const char* func_name, int line = 0){
-                    switch (logLevel)
-                    {
-                    case Logger::LogLevel::L_INFO:
-                        logBuffer << "[INFO] ";
-                        break;
-                    case Logger::LogLevel::L_WARNING:
-                        logBuffer << "[WARN] ";
-                        break;
-                    case Logger::LogLevel::L_ERROR:
-                        logBuffer << "[ERR_] ";
-                        break;
-                    default:
-                        break;
-                    }
-                    if (line > 0) {
-                        logBuffer << line << "| ";
-                    }
-                    logBuffer << func_name << "(): ";
+                    logBuffer << getInstance().getLogPrefix(logLevel, func_name, line);
                 }
                 ~Wrapper(){
                     getInstance().enQueue(logBuffer.str());
@@ -64,15 +48,15 @@ namespace mik64{
         Logger& operator=(const Logger&) = delete;
         void enQueue(const std::string& str);
         void deQueue();
-
+        std::string getLogPrefix(LogLevel logLevel, const std::string& func_name, int line);
         std::thread writer_;
         std::condition_variable cv_;
         std::mutex mtx_;
-        std::queue<std::string> q_;
+        std::queue<std::string> front_;
+        std::queue<std::string> back_;
         std::atomic<bool> running_{true};
         std::atomic<bool> is_ptr_changed_{false};
-        std::atomic<int> processing_count_{0};
-
+        int batch_ = 64;
         std::vector<std::shared_ptr<IWriter>> writerptrs_;
     };
 }

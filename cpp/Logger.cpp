@@ -1,4 +1,4 @@
-#include "../h/logger.h"
+#include "logger.h"
 #include <iostream>
 namespace mik64 {
     void Logger::setWriters(std::vector<std::shared_ptr<IWriter>> writerptr){
@@ -21,14 +21,20 @@ namespace mik64 {
         static Logger instance;
         return instance;
     }
+    void Logger::log(LogLevel logLevel, const std::string& func_name, int line, const std::string& message) {
+        enQueue(getLogPrefix(logLevel, func_name, line) + message);
+    }
     void Logger::flush() {
+        cv_.notify_all();
         std::unique_lock<std::mutex> lock(mtx_);
-        cv_.wait(lock, [this] { return (q_.empty() && processing_count_ == 0) || !running_; });
+        cv_.wait(lock, [this] { return (front_.empty() && back_.empty()) || !running_; });
     }
     void Logger::enQueue(const std::string& data){
         std::lock_guard<std::mutex> lock(mtx_);
-        q_.push(data);
-        cv_.notify_one();
+        front_.push(data);
+        if(front_.size() % batch_ == 0){
+            cv_.notify_one();
+        }
     }
     void Logger::deQueue() {
         std::string data;
@@ -36,10 +42,8 @@ namespace mik64 {
         while (true) {
             {
                 std::unique_lock<std::mutex> lock(mtx_);
-                cv_.wait(lock, [this] { return !q_.empty() || !running_; });
-                if (!running_ && q_.empty()) break;
-                data = std::move(q_.front());
-                q_.pop();
+                cv_.wait(lock, [this] { return !front_.empty() || !running_; });
+                if (!running_ && front_.empty()) break;
                 if(is_ptr_changed_) {
                     writers.clear();
                     for(const auto& writer : writerptrs_){
@@ -47,14 +51,39 @@ namespace mik64 {
                     }
                     is_ptr_changed_ = false;
                 }
-                processing_count_++;
+                std::swap(front_, back_);
             }
-            for(const auto& writer : writers){  //미설정시 애초에 for문 진입 안함
-                if(writer)
-                    writer->write(data);
+            
+            while(!back_ .empty()){
+                data = std::move(back_.front());
+                back_.pop(); 
+                for(const auto& writer : writers){
+                    if(writer)
+                        writer->write(data);
+                }
             }
-            processing_count_--;
             cv_.notify_one();
         }
+    }
+    std::string Logger::getLogPrefix(LogLevel logLevel, const std::string& func_name, int line) {
+        std::string prefix;
+        switch (logLevel) {
+            case LogLevel::L_INFO:
+                prefix = "[INFO] ";
+                break;
+            case LogLevel::L_WARNING:
+                prefix = "[WARN] ";
+                break;
+            case LogLevel::L_ERROR:
+                prefix = "[ERR_] ";
+                break;
+            default:
+                break;
+        }
+        if (line > 0) {
+            prefix += std::to_string(line) + "| ";
+        }
+        prefix += func_name + "(): ";
+        return prefix;
     }
 }

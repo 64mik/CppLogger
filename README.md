@@ -14,6 +14,16 @@ C++ logging library using the Singleton pattern. Supports multiple output destin
 
 ## How to use
 
+### As a submodule
+```bash
+git submodule add https://github.com/64mik/cpp-logger.git
+```
+
+```cmake
+add_subdirectory(lib/cpp-logger)
+target_link_libraries(your_project PRIVATE cpp-logger)
+```
+
 ### Basic Setup
 ```cpp
 //main.cpp
@@ -23,7 +33,7 @@ C++ logging library using the Singleton pattern. Supports multiple output destin
 int main(){
 	// Create writers console (and/or) file
 	mik64::Logger::getInstance().setWriters(mik64::LoggerFactory::getWriters({"file","console"}));
-	MLOG_INFO << "This is an info message " << 1;
+	MLOG_INFO_S << "This is an info message " << 1;
 }
 ```
 
@@ -32,9 +42,9 @@ int main(){
 
 void example(){
 	// Log messages
-	MLOG_INFO << "This is an info message " << 1;
-	MLOG_WARNING << "This is a" << " warning message";
-	MLOG_ERROR << 0.1 << " This is an error message";
+	MLOG_INFO("This is an info message ");
+	MLOG_WARNING_S << "This is a" << " warning message";
+	MLOG_ERROR_S << 0.1 << " This is an error message";
 }
 ```
 
@@ -43,7 +53,10 @@ void example(){
 - `MLOG_INFO`: Logs at INFO level
 - `MLOG_WARNING`: Logs at WARNING level
 - `MLOG_ERROR`: Logs at ERROR level
-- `MLOG`: It's Alias for LOG_INFO, It will be None LogLevel later
+
+- `MLOG_INFO_S`: Log stream at INFO level
+- `MLOG_WARNING_S`: Log stream at WARNING level
+- `MLOG_ERROR_S`: Log stream at ERROR level
 
 ### Log Output Format
 
@@ -63,26 +76,27 @@ This project uses C++17 and requires a C++ compiler
 
 - C++17 compatible compiler
 - Windows: MinGW-w64 or MSVC
+- Cmake 3.15+
 
 ## Example Output
 
 ### Console
 ```
-[INFO] 15| main(): This is an info message 1
-[WARN] 16| main(): This is a warning message
-[ERR_] 17| main(): 0.1 This is an error message
+[INFO] 27| main(): This is an info message 
+[WARN] 28| main(): This is a warning message
+[ERR_] 29| main(): 0.1This is an error message
 ```
 
 ### File
-```logs/2026-04-14.log
-[18:19:40] [INFO] 24| main(): This is an info message 1
-[18:19:40] [WARN] 25| main(): This is a warning message
-[18:19:40] [ERR_] 26| main(): 0.1 This is an error message
+```logs/2026-05-06.log
+[20:20:56] [INFO] 27| main(): This is an info message 
+[20:20:56] [WARN] 28| main(): This is a warning message
+[20:20:56] [ERR_] 29| main(): 0.1This is an error message
 ```
 
 ## Performance
 
-- Tested with 100,000 logs in ~425ms (enqueue/dequeue) on Windows 11, Intel i5-10210U
+- Tested with 100,000 logs in ~52ms (enqueue/dequeue) on Windows 11, Intel i5-10210U (Release build)
 
 ## License
 

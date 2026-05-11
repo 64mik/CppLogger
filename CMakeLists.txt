@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
-project(cpp-logger)
-
-file(GLOB LOGGER_SOURCES "cpp/*.cpp")
-
-add_library(cpp-logger STATIC ${LOGGER_SOURCES})
-
-target_include_directories(cpp-logger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/h)
-
-target_compile_features(cpp-logger PUBLIC cxx_std_17)
-add_executable(cpp-logger-test main.cpp)
-target_link_libraries(cpp-logger-test PRIVATE cpp-logger)
+project(mik64_cpp_logger)
+if(NOT TARGET mik64_cpp_logger)
+    file(GLOB LOGGER_SOURCES "cpp/*.cpp")
+    add_library(mik64_cpp_logger STATIC ${LOGGER_SOURCES})
+    add_library(mik64::cpp-logger ALIAS mik64_cpp_logger)
+    target_include_directories(mik64_cpp_logger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/h)
+    target_compile_features(mik64_cpp_logger PRIVATE cxx_std_17)
+endif()
+add_executable(mik64_cpp_logger_test main.cpp)
+target_link_libraries(mik64_cpp_logger_test PRIVATE mik64::cpp-logger)
